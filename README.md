@@ -1,6 +1,15 @@
 
 # Follow Language
 
+This project is part of the **Canor Infinitum FOSS Projects** and is licensed under the **GNU AGPL v3.0-or-later**.
+
+---
+
+## Ecosystem Integration
+FollowLang specifies the suite of meta-programming languages (Flow, Action, Maneuvers, United Interchange, Elite, Follower, Ether) used in the CanorOS vibe-coding ecosystem. These languages represent the interface layers through which AetherAI translates user intent, verified at compilation by Envoy, and executed mathematically inside the Follow engine.
+
+---
+
 A Fully-Fledged, Reactive Paradigm, Symbolic Meta-Programming Language, the Follow™-suite
  - A theory of Quantum Gravity Turing-Computing Programming Languages and their Quantum Gravity Communication Theories.
 
