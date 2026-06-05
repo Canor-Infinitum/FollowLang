@@ -1,0 +1,519 @@
+object HighlightReel: THighlightReel
+  Left = 319
+  Height = 288
+  Top = 834
+  Width = 768
+  BorderStyle = bsNone
+  Caption = 'Highlight Reel'
+  ClientHeight = 288
+  ClientWidth = 768
+  Color = 2236962
+  Constraints.MinHeight = 288
+  Constraints.MinWidth = 768
+  Font.Color = 2236962
+  Font.Height = -16
+  Font.Name = 'Cambria'
+  FormStyle = fsStayOnTop
+  Position = poDesktopCenter
+  SnapOptions.Distance = 25
+  LCLVersion = '4.6.0.0'
+  OnActivate = FormActivate
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnMouseDown = FormMouseDown
+  OnMouseEnter = FormMouseEnter
+  OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
+  OnShow = FormShow
+  object Main: TPanel
+    Left = 0
+    Height = 288
+    Top = 0
+    Width = 768
+    Align = alClient
+    BevelColor = 26367
+    BevelOuter = bvNone
+    ClientHeight = 288
+    ClientWidth = 768
+    Color = clCream
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 0
+    OnClick = Activate
+    OnMouseDown = FormMouseDown
+    OnMouseMove = FormMouseMove
+    OnMouseUp = FormMouseUp
+    object MainPanel: TPanel
+      Left = 0
+      Height = 262
+      Top = 26
+      Width = 768
+      Align = alClient
+      BevelColor = 4491519
+      BorderWidth = 1
+      ClientHeight = 262
+      ClientWidth = 768
+      Color = clCream
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 0
+      OnClick = Activate
+      object MainReel: TPanel
+        Left = 2
+        Height = 120
+        Top = 2
+        Width = 764
+        Align = alTop
+        BevelOuter = bvNone
+        Constraints.MinHeight = 120
+        ParentBackground = False
+        TabOrder = 1
+      end
+      object SubReel: TPanel
+        Left = 2
+        Height = 113
+        Top = 127
+        Width = 764
+        Align = alClient
+        BevelOuter = bvNone
+        Constraints.MinHeight = 96
+        ParentBackground = False
+        TabOrder = 2
+      end
+      object ReelSplitter: TSplitter
+        Cursor = crVSplit
+        Left = 2
+        Height = 5
+        Top = 122
+        Width = 768
+        Align = alTop
+        Constraints.MaxHeight = 5
+        Constraints.MinHeight = 5
+        Constraints.MinWidth = 768
+        ResizeAnchor = akTop
+      end
+      object BottomPanel: TPanel
+        Left = 2
+        Height = 20
+        Top = 240
+        Width = 764
+        Align = alBottom
+        BevelOuter = bvNone
+        ClientHeight = 20
+        ClientWidth = 764
+        ParentBackground = False
+        TabOrder = 0
+        OnClick = Activate
+        object ResizePanel: TPanel
+          Left = 744
+          Height = 20
+          Top = 0
+          Width = 20
+          Align = alRight
+          BevelOuter = bvNone
+          ClientHeight = 20
+          ClientWidth = 20
+          ParentBackground = False
+          TabOrder = 0
+          OnClick = Activate
+          OnMouseDown = FormMouseDown
+          OnMouseMove = ResizeMouseMove
+          OnMouseUp = ResizeMouseUp
+          object ResizeText: TStaticText
+            Left = 0
+            Height = 20
+            Top = 0
+            Width = 20
+            Align = alClient
+            Alignment = taRightJustify
+            Caption = '⇲'
+            Font.Color = 2236962
+            Font.Height = -21
+            Font.Name = 'Cambria'
+            ParentFont = False
+            TabOrder = 0
+            OnMouseDown = ResizeMouseDown
+            OnMouseMove = ResizeMouseMove
+            OnMouseUp = ResizeMouseUp
+          end
+        end
+        object Status: TPanel
+          Left = 0
+          Height = 20
+          Top = 0
+          Width = 744
+          Align = alClient
+          BevelOuter = bvNone
+          ClientHeight = 20
+          ClientWidth = 744
+          ParentBackground = False
+          TabOrder = 1
+          object StatusText: TStaticText
+            Left = 0
+            Height = 20
+            Top = 0
+            Width = 744
+            Align = alClient
+            Caption = 'OK - Ready!'
+            TabOrder = 0
+          end
+        end
+      end
+    end
+    object TopPanel: TPanel
+      Left = 0
+      Height = 26
+      Top = 0
+      Width = 768
+      Align = alTop
+      BevelColor = 26367
+      BevelOuter = bvNone
+      ClientHeight = 26
+      ClientWidth = 768
+      Color = clCream
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 1
+      OnClick = Activate
+      OnMouseDown = FormMouseDown
+      OnMouseMove = FormMouseMove
+      OnMouseUp = FormMouseUp
+      object LogoHeader: TPanel
+        AnchorSideRight.Control = Selector
+        AnchorSideRight.Side = asrBottom
+        Left = 0
+        Height = 26
+        Top = 0
+        Width = 664
+        Align = alClient
+        BevelColor = 26367
+        BevelInner = bvRaised
+        BevelOuter = bvNone
+        ClientHeight = 26
+        ClientWidth = 664
+        ParentBackground = False
+        TabOrder = 1
+        object Logo: TImage
+          Left = 3
+          Height = 24
+          Top = 1
+          Width = 26
+          Align = alLeft
+          BorderSpacing.Left = 2
+          BorderSpacing.Right = 2
+          Center = True
+          Picture.Data = {
+            1754506F727461626C654E6574776F726B477261706869633511000089504E47
+            0D0A1A0A0000000D4948445200000060000000600806000000E2987738000000
+            017352474201D9C92C7F0000000467414D410000B18F0BFC6105000000206348
+            524D00007A26000080840000FA00000080E8000075300000EA6000003A980000
+            17709CBA513C00000006624B4744000000000000F943BB7F0000000970485973
+            00002E2300002E230178A53F760000000774494D4507EA0516170400BB9C6586
+            000010794944415478DAED9C69741CD599869F5BD5FB22A95B8B25CB92F18217
+            196363700C31663506024C5862C8E40019C240987080C9494E9A84644842CE40
+            0542C24C4826190F09FBE2906108EB98246689318B01231B83252FB265AD2DB5
+            A456EFDD75E747B719E145ADEAC5F28F7ACFA97F55B7BEFBBD77FBDEFBDD0B26
+            4C983061C2840913264C983061C2840913264C983061C284091326CA0A519252
+            0252019602A7E79E9304B2C692892B163D81AE58482B7632C29A01DA810F73CF
+            2BC05B68424EAA1702D20D9C079C0F2C11C805163D61B3E80974A192529CE842
+            1D057601EB3F7D343138B90404A417F82A709337D937C717EBC017DB4365A21B
+            6B268AE0B37ED5854AD4EA276CAB236C9F42D0358BA8D5BF0F7806B81F4D6C3B
+            C28E5F08FCB322335FF1C53A1CB5D1762A12DD7892411499FECCAB69C54EC456
+            43C8D1947D9CD363BA501F05EE43135B8E2C01D9167FA390999F4C897C52D13C
+            FC0E15899E828A8AD86AE8F1B4B0B7E2043DAD389E017E8226DE2FB3E367019A
+            233D7269D3C87BA271E4032C7AC2501149D5CDDE8A25ECAB582C93AAEB19E046
+            34D15D7E0202722EB0C61FDB7DEAFCFE9770A6874BE2938C62A3B3E20476579D
+            9C49298EFB81EFA38970891D6F05BE6FD1E3B7CE0C6DB0358D6C4248BDA82275
+            6161877F057B2A4F0A49946FA28907CB4740405E60D1134FCD19F8B36B6AB8B5
+            2C8D33A9BAD85E7D363D9E964EE06A34F1D712397F0EF0485D64FBD279C197B1
+            65A225B57BC4DEC0D6BA0B8858ABFF0BB8014DA44B4B40405EEF48877FB5B867
+            ADEA49F6977D78EE77CD666BDD85E9B4620FA0897B8B74FEF9AA4C3D3137B8AE
+            A25C0D67FF3CB1B9FE32428EA63F015F4613D1D2101090DFF424FBEF3DA1672D
+            F674982385A8D5C7E6299712B1D53C045C3BD1567580EDB738D2E17B17F53EAD
+            7813BD65B759172A5BEA2EA2CF3D773D702E9A488EF7BE32810A7CD1991EBA67
+            49F71347D4F900AE5488CF753D842FBEF76AE0B1DC186EC4F9B77B937DBFF8DC
+            BE078F88F30114996161EFB3F863BBCF00FE23EFFB792AB0C4A2C71F5BDCFD07
+            A5D463E644A1EA294EE87E0A7FAC6335F024016999A0F36FAB4C74FDF0C4AEC7
+            B165224738B8D239BEF719DCA9816B08C86F174640403A80C716F63EEB72A706
+            26354E52649AC53D6BA98A775E02FC62829F5DD8D2F702163D3E29365BF4048B
+            7A9E46D553FF4A401E5F480FF897C6F0E6B9D5B15D4745C8AEC80C8B7AFF8833
+            3574230179F3043E79BCADFACC49B5D9950A3133F48615F84D2E769A200101B9
+            D89E19FDCEB1037FE568823513E3849EB558F4F8BD04E419795EFF65D035EBB5
+            6EEF71936A73F3F03B7813BD27033718E90177CD19F88B6A343A3C32AD6A9096
+            FE9754E01102B2FAB02F6A4207AEDD5E7D762CA17A26516C93CC1D7805E007B9
+            613D0F0101B9C49D1A585537FA31472BEA229FD038F24123F0100129C621A13D
+            A538BEB7ADF6BC49B5B72ADE4955BCB33EA79BE5ED01B7CF086D10070A69471B
+            E60EFC19776AE00BC0D7F2BCFA6F41D7AC37BA3D0B26D5DE638636027C9B8054
+            0F4F4040CE71A6862E9A32BA8DA31D8A4CD3D2F70202790F013935CF50F4B5ED
+            35933B14D54477E04E0DCC06567D66B574C07B574E1D6D2DAAF547AD3EBABD0B
+            19743413B5559316362C7A02776A007FAC83C6F0E692057495892E9A86DFADDA
+            53B9F4D7C017C721A12D1590B77D5C7BEEBD8B7A9E1EDF76CF710CB86610B156
+            A30B0B563D862719A426BA8386D12D5833B182EDAD1FFD881DBE1597032F1E2C
+            4564C7D2F6E57B7F33D3991A2A2004B7B0BDFA2CF6552C1A96280F00CF025B81
+            20E0075A800B85D4FFB16964937FD6E0EBA832553409196161E3B46B8959AB56
+            A3893F8C13D728C06B0BFA9E5BDE30BAF500C7FB69F79F469F7B4E08C453C05A
+            E023A017A805160317AB7AF2AB33437F734E1F7EBBC0C6E96743D37543403D9A
+            481C48C0F2CAF8BE3796763D52800865E3BD862F33626F781AF83A9A1818C711
+            15C05DEED4C00D8BBBD78A52C8D941D72C3EA8FFD21E60FEB8025840CEB1EAF1
+            CDA7EC5DE3B0652248A1B2D3B79CDD959F8B4AA1FE1CD0C695C003B20178686A
+            B875654BFF0B05D9FAD6B46B08DBEA2E4413CF1F38077CA12EB2BDA0425BA75C
+            CC88BDE177C0EA719D9F1D0E46D0C43722D6EAABDF69BC2A19B15697647CAD89
+            EE6806BE9BE7DFDB538AE3B66DB5E711B5FA79BBF16A76559DF21729D4796822
+            FFFE4376C3E5822EEFC2973BAA961564AB3FBA0BE08C434DC2A7F9E27B0C17B8
+            AF623103CE191F92D5C0273E7968E291A4EA5EFD5EC315E998A5B26812E60CFC
+            194566BE4D40CECCF3EA7DFDAED94F6C9C764D57D856772B700E9AD86BC0EE24
+            70D50EDF8ABEA8D557D0921438F5B30404A4D3A2279719550C756161A76F39C0
+            4DF964D7C354E6D984C57BEDE6FACBC8086B5104B852219A86DF750077E5F967
+            064DFCBDFE536B239AD072AB24A376F7EB42FDE10EDF0AE30424F6012C21205D
+            637BC0B2CA78A7D5E8EAA7C7339F84EA79154DBC56B0E734F1D0A8ADF6DE5204
+            4B3386DEC4AAC7BF44402E3D022BCB357D9EB97D49D56D584E71A5423660D158
+            025ABCC93EC316F464839B074A5099408FA7E5AD1E4F4BD10AE431A13705A095
+            DDFD9A484994477B3CF30B92538059630938D6E8D253172A438E691278A10495
+            4903577D5C734E3461F1165554D3C8261CE9913309C8F38F402F7831E46836FC
+            51CED733C612303BC7CA8411B64D41176A1B9A0896A845B5A515C7ED9F54AF2C
+            3242CE302BF43AC09D8793804B88B7861D8D19C3046497DE33C71230D3E87A3C
+            B70228B562775F9F7BCE967EF7B14515D210DE8A3B195C045C59E6616824A9BA
+            F6A515BBA1CF724AC0D4B10454190DB1E3D64A808E528FABC0373EA93E5BEAC2
+            52444192D9A1D7007E7C2809B8C4E8885B2A8CCD553209E01E4380741B950552
+            8A0320548656F57ADC52F9D0EE02039DFDA88DB45199E89A0EDC586602FA92AA
+            CBD830A9A73E4B80AAA7DD46FF9A6BA1E5DA70FD4E47D5B261A32DEB40CC1E58
+            0FF03D02B2AA8C04C48CF6D65C63CF1110903655A62CC63BB900C894A54A9AE8
+            CB08EB9D3B7DA716558C2FBE97DA489B3FAF44511CE24609C8A5435AF6F78094
+            2E54C3FAB39ACD1E2EE7F87A5FB7F7B8CE515B6D51851C3BB81E21F59B09C8E6
+            32D96913D2583BCC283680D12C019A901961352C72E7D2B7DD6573BF26E21271
+            47BBFFF422258A41A68DBCEF00EE2E93A54E551A4BD8CBC92E914FE700299488
+            14C696CCF6CC2840439927B80782AE59DB871CD38A2A6456E8756C99E8E5650A
+            CE6AAD7AAC881E90C5A8D1B5AC233D02D05C56F76723E41F14227A1D2851CC1E
+            5C0F70FF7E11AC8438C691321643A55427C0E05802F61A5D71B8930300C78D9B
+            95501AAC0D399B370D3A8F29AA90A9E1567CF1BD3380DB4B66594056DA32D126
+            ABC1ECBB5C10DB3E96805D463579576A106B26560DCC2B732F90C0AD6DFE338A
+            2EAAA5FF451499FEE678A98206F1F9AA78A76AF4A3A8E5600276C62CC697CAFE
+            D86E186F33BC7424BC12B64F59D75B80F2F899D9321562F6E0AB56E06102D259
+            02CB2E2E2475F3503DA02D6233BE353875740BC0578F80E805706BBBEF346974
+            B170209A87DFA526BAE378E0E7450E3F5E45A6AF309AC2931156A256BF0E6C19
+            4BC0C66147A3611BAAA3BB702783F380D5455444E48E89E6EB05EFC5AC554F76
+            7A1717CDE482BEE771A686BE4E401623537CAB716473A5D1F4CD6147235228AD
+            6822F4FF04686257C4EAEFCEE93BC644AFC15701EE2E28DCCF6619BC644F87C3
+            04E49F2630A17F77A77F453CB78A2818563DC6E29E3F60D1E3F71190971760F7
+            026B2676EB8CA10D863F0D399B015EFD349E1A1320BF59482FA88DB63335DCDA
+            44F6048BCD4025560BA9B7CE0CBDB16AF9DEDF0A77327821707D9E5EB03BA538
+            EE6AF79D56742F70A70658D2FD946AD1138F1290D71A6B34F299F9C197EC851C
+            5A19CC6EE0AC3F0401FC6FD035ABA0CACC0BBE4C7574E7F9C03A0272769E0A2C
+            23205FF3267A9F5ADAF570F5CCD0DF50649A05FDCF23D0EF2620A7E7F9DD4FBB
+            2A16758CD8EB8B26A122D1CD495D8F5A9CA9A13504E4EF09C8BA3CB6AF14C8B7
+            E605D7CD2E2485276EF132EC981A257B4340B6D98F29BCCE968974ADE8B85F2D
+            24355122D8ED3B858ECA65E9B4627B9EEC56652B1005EAC96E427FC5991A5A34
+            63E84D1AC2AD079DA4DFE13F8D5D55A7BC02AC1A37C525202FA94874FF71E9BE
+            87294512715AB1B3C37F1A9DDEC5512994B5C03AA08DACDAEB074E04BEE44E06
+            4F9E37B00E5F6C4F41FFD95D7532EDFED31F47135F3998806CC55E39B1FBF1B3
+            0BFDC1FECAF4B9E712723613B5FA480B1B563D8E37D9476DA40D7FAC030EE334
+            29543636FE03115BCD0D68E237795AE3D3C70EAEBF74FAD05B255B662555373D
+            9EF90C39A611B754E47243E378127DD446DBC7B57D22D838ED6B8CDA6A3FCD8A
+            3B1401D73684B7AC59D0FF3C9385117B3DEF345E1596280BD144C73804D42B32
+            BDF5E4CEDFF98DEE674F06861D8DBC33F5CA1EA039B7F377D01C00F068AF677E
+            6FB19909C58DCB3D4C1F7ADB0B3C90E7F0458F2E2CB76CADFDC2FEBD89A31ABB
+            AA4E01F8D958E71F4C8026E2BA507FB5A7F2A449357666E80DDCC9E059135815
+            3D32EC687C6AA77FC551EDFCDCCD30410E716EF85061E5FDFBBC8BA24633BE4A
+            09456658D0FFC2445745D7EDAA3AB97DC039E3A82520A7E6FE1C4D8CE6274013
+            0369C57EC7F6EAB326D5E88A44F7FEA1684D9EA16804C4155BEB2E4C9622C9B7
+            D4E873CF25E89AB593C39C6F3E9CB0F2B31E4F4B6BB112708986A295C075F964
+            8AA4EABAE6FD86CBA5F168BE7C482B0E3EAE3947923D33119D3801D989E2868F
+            6ACFD38B0DFB8B1D8AA68DBC0FB07C025AD16351ABFFB6CDF597515C4E51E9B0
+            AD661549D5FD7B34F1CA61EB384E8536C42D95B77E38E5128A55200B45BF6B36
+            6DD567C680895D82A4893B871CD37EF97EFD6A328A75529DBFD3B79C5ECFFCCD
+            C02DE336B23C15BA3BE4687AF8E39A5547BC02DDDEE3F870CA25C3BAB0AC4213
+            7F31F0E9CD2167F33DEFD55F81D16DD652A1C7D3C24EDFA9DDC045F94EDDE45F
+            406753FB9E6B0C6F3E7B5EFFCB94FFFCB0A0CD7F3A1D55CBF6007F8726361754
+            4C40FEC0951AFCD1A2DEFF16EE64F08839BFCBBB906D35E70D49A1AC44139BF2
+            D7766295B1038FD545B65F7A5CDFB328B23CF95809D5C3D6BA0B18741EF337E0
+            323451DC253F017989AA271F9C1F7CD95B3FFA51F9832DDFE7D9E15BD1099C3F
+            D19B148D5C59A602FFEE4DF4FED3C2BEFFC1950A95BCDB7E52B33293529C7701
+            3F3A30622C828439C063B5D1F613E706D7EDCFE6286DC3B178F8B8E65CFA5DB3
+            5B810B8C9C392BE4D6C48B5599FAED31431B6BA70FBD7DD0FD9AC6B59F06B657
+            9FC590635A2BD9837E1B4AEEA16CE3B949D59377348F6CF2340DBF5B924BFB24
+            0A5D15C7D3E63F239D56EC77033F46138652240ABD37B406B8DB9E19BDB26978
+            93656AB8D5D0AD545228049D33D95B791283CEE9DDC08F81FF441399B28E11D9
+            2B0DBEA5C8F4F50DE12D9EFAC836AAE29D86AFAE4C290EF6552C666FC5121216
+            EFEBC0CD68E283C266BCE22AD408DC24D0AFAB8C77F9FDB1DD54247A70A542D8
+            3211543D89142A69C54ECC52C9A8BD8E90A389A06BA64C2B8E8DC0AF81270B3A
+            61599CDD3EE01AE052AB1E3BC51FDDAD78937D7892FDB852212C7A227791AB24
+            AD3848AA2E12162F438E69841C4D8CD81B92BA50D702BF4013EF16B7E4285D17
+            5F42F600F272A089EC11FFEADC3F86802EE003E01DE03934B1EFA8889602720A
+            7016703CB090ECE1B98ADC630706C85EB7D00B6C045E03361C4AD73161C28409
+            13264C983061C2840913264C983061C2840913264C983061C2C481F83FAB288E
+            D51CE39EE80000000049454E44AE426082
+          }
+          Proportional = True
+          Stretch = True
+          OnMouseDown = FormMouseDown
+          OnMouseMove = FormMouseMove
+          OnMouseUp = FormMouseUp
+        end
+        object Header: TStaticText
+          Left = 31
+          Height = 24
+          Top = 1
+          Width = 632
+          Align = alClient
+          BorderSpacing.Left = 2
+          Caption = 'Canor Infinitum - ServiceName'
+          Font.Color = 2236962
+          Font.Height = -21
+          Font.Name = 'Cambria'
+          ParentFont = False
+          TabOrder = 0
+          OnMouseDown = FormMouseDown
+          OnMouseMove = FormMouseMove
+          OnMouseUp = FormMouseUp
+        end
+      end
+      object Selector: TPanel
+        Left = 664
+        Height = 26
+        Top = 0
+        Width = 104
+        Align = alRight
+        BevelOuter = bvNone
+        ClientHeight = 26
+        ClientWidth = 104
+        ParentBackground = False
+        TabOrder = 0
+        object ToolPanel1: TPanel
+          Left = 0
+          Height = 26
+          Top = 0
+          Width = 26
+          Align = alRight
+          BevelColor = 26367
+          ClientHeight = 26
+          ClientWidth = 26
+          ParentBackground = False
+          TabOrder = 0
+          OnClick = Tool1Click
+          OnMouseEnter = Tool1MouseEnter
+          OnMouseLeave = Tool1MouseLeave
+          object ToolText1: TStaticText
+            Left = 1
+            Height = 24
+            Top = 1
+            Width = 24
+            Align = alClient
+            Alignment = taCenter
+            Caption = '⋯'
+            Font.Color = 2236962
+            Font.Height = -19
+            Font.Name = 'Cambria'
+            ParentFont = False
+            TabOrder = 0
+            OnClick = Tool1Click
+            OnMouseEnter = Tool1MouseEnter
+            OnMouseLeave = Tool1MouseLeave
+          end
+        end
+        object ToolPanel2: TPanel
+          Left = 26
+          Height = 26
+          Top = 0
+          Width = 26
+          Align = alRight
+          BevelColor = 26367
+          ClientHeight = 26
+          ClientWidth = 26
+          ParentBackground = False
+          TabOrder = 1
+          OnClick = Tool2Click
+          OnMouseEnter = Tool2MouseEnter
+          OnMouseLeave = Tool2MouseLeave
+          object ToolText2: TStaticText
+            Left = 1
+            Height = 24
+            Top = 1
+            Width = 24
+            Align = alClient
+            Alignment = taCenter
+            Caption = '‒'
+            Font.Color = 2236962
+            Font.Height = -19
+            Font.Name = 'Cambria'
+            ParentFont = False
+            TabOrder = 0
+            OnClick = Tool2Click
+            OnMouseEnter = Tool2MouseEnter
+            OnMouseLeave = Tool2MouseLeave
+          end
+        end
+        object ToolPanel3: TPanel
+          Left = 52
+          Height = 26
+          Top = 0
+          Width = 26
+          Align = alRight
+          BevelColor = 26367
+          ClientHeight = 26
+          ClientWidth = 26
+          ParentBackground = False
+          TabOrder = 2
+          OnClick = Tool3Click
+          OnMouseEnter = Tool3MouseEnter
+          OnMouseLeave = Tool3MouseLeave
+          object ToolText3: TStaticText
+            Left = 1
+            Height = 24
+            Top = 1
+            Width = 24
+            Align = alClient
+            Alignment = taCenter
+            Caption = '◻'
+            Font.Color = 2236962
+            Font.Height = -19
+            Font.Name = 'Cambria'
+            ParentFont = False
+            TabOrder = 0
+            OnClick = Tool3Click
+            OnMouseEnter = Tool3MouseEnter
+            OnMouseLeave = Tool3MouseLeave
+          end
+        end
+        object ToolPanel4: TPanel
+          Left = 78
+          Height = 26
+          Top = 0
+          Width = 26
+          Align = alRight
+          BevelColor = 26367
+          ClientHeight = 26
+          ClientWidth = 26
+          ParentBackground = False
+          TabOrder = 3
+          OnClick = Tool4Click
+          OnMouseEnter = Tool4MouseEnter
+          OnMouseLeave = Tool4MouseLeave
+          object ToolText4: TStaticText
+            Left = 1
+            Height = 24
+            Top = 1
+            Width = 24
+            Align = alClient
+            Alignment = taCenter
+            Caption = '⤬'
+            Font.Color = 2236962
+            Font.Height = -19
+            Font.Name = 'Cambria'
+            ParentFont = False
+            TabOrder = 0
+            OnClick = Tool4Click
+            OnMouseEnter = Tool4MouseEnter
+            OnMouseLeave = Tool4MouseLeave
+          end
+        end
+      end
+    end
+  end
+  object Highlighter: TTimer
+    Interval = 200
+    OnTimer = HighlighterTimer
+    Left = 8
+    Top = 240
+  end
+end
