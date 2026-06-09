@@ -73,7 +73,10 @@ type
     FormDragging, FormResize : Boolean;
     DragX, DragY, ResizeX, ResizeY : Integer;
     Highlighting : Boolean;
+    procedure ModuleListDblClick(Sender: TObject);
   public
+    ModuleList: TListBox;
+    procedure AddModule(const AName: String; AWorkshop: TForm);
     procedure StartHighlight(Sender : TObject);
     procedure StopHighlight(Sender : TObject);
   end;
@@ -115,7 +118,30 @@ end;
 
 procedure THighlightReel.FormCreate(Sender: TObject);
 begin
+  ModuleList := TListBox.Create(Self);
+  ModuleList.Parent := SubReel;
+  ModuleList.Align := alClient;
+  ModuleList.OnDblClick := @ModuleListDblClick;
+end;
 
+procedure THighlightReel.AddModule(const AName: String; AWorkshop: TForm);
+begin
+  ModuleList.Items.AddObject(AName, AWorkshop);
+end;
+
+procedure THighlightReel.ModuleListDblClick(Sender: TObject);
+var
+  W: TForm;
+begin
+  if ModuleList.ItemIndex >= 0 then
+  begin
+    W := TForm(ModuleList.Items.Objects[ModuleList.ItemIndex]);
+    if Assigned(W) then
+    begin
+      W.Show;
+      W.BringToFront;
+    end;
+  end;
 end;
 
 procedure THighlightReel.FormKeyDown(Sender: TObject; var Key: Word;

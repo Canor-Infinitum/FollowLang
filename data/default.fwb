@@ -1,0 +1,48 @@
+&package.default::FollowPackages:&package.default::FollowPackages:
+  (
+    name = "core";
+    headers = [tensorial.h, tensor.h, expression.h];
+    deps = [];
+  );
+
+  &math:
+  (
+    name = "math";
+    headers = [
+      number.h, arbitrary.h, length.h,
+      elementary.h, composite.h, unique.h, unknown.h
+    ];
+    deps = [core];
+  );
+
+  &geometry:
+  (
+    name = "geometry";
+    headers = [
+      point.h, axis.h, composition.h,
+      unit.h, unity.h, uniter.h, unital.h
+    ];
+    deps = [core, math];
+  );
+
+  &physics:
+  (
+    name = "physics";
+    headers = [atom.h, change.h, force.h];
+    deps = [geometry];
+  );
+
+  &markov:
+  (
+    name = "markov";
+    headers = [markov.h, chain.h, generator.h, process.h];
+    deps = [math];
+  );
+
+  &qgct:
+  (
+    name = "physics.qgct";
+    headers = [tensor.h, expression.h];
+    deps = [physics, core];
+  );
+);

@@ -9,7 +9,7 @@ uses
   {$IFDEF HASAMIGA}
   athreads,
   {$ENDIF}
-  Interfaces,
+  Interfaces, // this includes the LCL widgetset
   Forms, ASICLogin, ASICPrompter, ASICWorkshop, ASICTools, ASICHighlightReel;
 
 {$R *.res}

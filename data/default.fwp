@@ -1,0 +1,110 @@
+&project.default::QGCT_Follow_Project:
+
+(
+  &identity:
+  (
+    name        = "QGCT-Schwarzer-Follow";
+    version     = "0.2";
+    domain      = "quantum_gravity";
+  );
+
+  &tensors:
+  (
+    metric:
+      name      = g_(αβ);
+      rank      = 2;
+      type      = covariant;
+
+    ricci_tensor:
+      name      = R_(αβ);
+      rank      = 2;
+      type      = covariant;
+
+    ricci_scalar:
+      name      = R;
+      rank      = 0;
+      type      = scalar;
+
+    ricci_scaled:
+      name      = R*;
+      rank      = 0;
+      type      = scalar;
+
+    stress_energy:
+      name      = T_(αβ);
+      rank      = 2;
+      type      = covariant;
+  );
+
+  &fields:
+  (
+    scalar:
+      f:
+        type = scalar_field;
+
+    functional:
+      F:
+        target = f;
+        type   = scalar_functional;
+  );
+
+  &derivatives:
+  (
+    first:
+      F':
+        of        = F;
+        variable  = f;
+
+    second:
+      F'':
+        of        = F;
+        variable  = f;
+
+    covariant:
+      nabla:
+        symbol = ∇;
+
+    laplacian:
+      Δf:
+        type = scalar_contraction;
+  );
+
+  &constants:
+  (
+    κ:
+      type = coupling_constant;
+
+    Λ:
+      type = cosmological_constant;
+
+    n:
+      type = dimensional_parameter;
+  );
+
+  &operators:
+  (
+    contraction:
+      metric = g_(αβ);
+
+    covariant_derivative:
+      operator = ∇;
+
+    scalar_product:
+      form = ∇_μ f ∇^μ f;
+  );
+
+  &constraints:
+  (
+    index_rules:
+    (
+      max_repetition_per_term = 2;
+      require_balanced_indices = true;
+    );
+
+    tensor_consistency:
+    (
+      enforce_covariance = true;
+      enforce_rank_match = true;
+    );
+  );
+);

@@ -1,0 +1,756 @@
+(*****************************************************************************)
+(* 1. Core										 							 *)
+
+&char::( &u8, &u16, &u32, &u64 );
+&char.min:0;
+&char.max:{
+	&char::&u8 => 255;
+	&char::&u16 => 65535;
+	&char::&u32 => 2147483647;
+	&char::&u64 => 9223372036854775807;
+};
+&char.value::&char;
+&char.string:&char.value.string;
+&char.representation:&char.value;
+
+&string<&char[]>($length::&char):[&char[$length]];
+
+&num::( &u8, &u16, &u32, &u64, &i8, &i16, &i32, &i64, &f32, &f64 );
+?precision<&N>:{
+	&N::[&u8 , &i8 ] => &p8;
+	&N::[&u16, &i16] => &p16;
+	&N::[&u32, &i32, &f32] => &p32;
+	&N::[&u64, &i64, &f64] => &p64;
+};
+
+&interval<&N>:{ $lower::&N; $upper::&N; };
+&real<&N>($num::&N):{ $value:$num::&N; $interval:&interval(&N); $precision:?precision(&N); };
+
+(*****************************************************************************)
+(* 2. Units	(Physical or Mathematical)			 							 *)
+
+&unit.header::&string;
+&unit.context::&string;
+&unit.value::&real<&num>;
+&unit.string:{ &unit.value.string + &unit.header + " (" + &unit.context + ")"};
+
+&unit($header::&unit.header, $context::&unit.context):{
+	&self.header:$header;
+	&self.context:$context;
+};
+&unit($header::&unit.header):{
+	&self.header:$header;
+	&self.context:"unnamed unit";
+};
+&unit($context::&unit.context):{
+	&self.header:"_";
+	&self.context:$context;
+};
+
+&unit:&unit.value;
+@unit($value:&unit.value)::&unit:$value;
+
+&unit%mul($other::&unit)::&unit(&self.header + "*" + $other.header, &self.context + " " + $other.context):&self.value * $other.value;
+&unit%div($other::&unit)::&unit(&self.header + "/" + $other.header, &self.context + " per " + $other.context):&self.value / $other.value;
+
+@tokens($tok::&unit.value)::&unit("tok", "token"):$tok;
+@seconds($s::&unit.value)::&unit("s", "seconds"):$s;
+@vibe($tok:@tokens, $s:@seconds)::&unit("v", "vibe"):@tokens / @seconds;
+
+(*****************************************************************************)
+(* 3. Hamilton's Rules: Extended Imaginary Bases 							 *)
+(* 		((i, j, k) < (m, n, o) < (r, s, t) < (e, f, g))						 *)
+
+&base<&unit[]>($length::&char):[&unit[$length]];
+&triplet::&base(3);
+
+&triplets::&triplet[4];
+&triplets[0]~i::&triplet[0]:=&unit("i", "Imaginary Unit");
+&triplets[0]~j::&triplet[1]:=&unit("j", "Imaginary Unit");
+&triplets[0]~k::&triplet[2]:=&unit("k", "Imaginary Unit");
+
+&triplets[1]~m::&triplet[0]:=&unit("m", "Imaginary Unit");
+&triplets[1]~n::&triplet[1]:=&unit("n", "Imaginary Unit");
+&triplets[1]~o::&triplet[2]:=&unit("o", "Imaginary Unit");
+
+&triplets[2]~r::&triplet[0]:=&unit("r", "Imaginary Unit");
+&triplets[2]~s::&triplet[1]:=&unit("s", "Imaginary Unit");
+&triplets[2]~t::&triplet[2]:=&unit("t", "Imaginary Unit");
+
+&triplets[3]~e::&triplet[0]:=&unit("e", "Imaginary Unit");
+&triplets[3]~f::&triplet[1]:=&unit("f", "Imaginary Unit");
+&triplets[3]~g::&triplet[2]:=&unit("g", "Imaginary Unit");
+
+&modulation<$basum::&triplet>:{ 
+    $left:$basum[0];
+    $middle:$basum[1]; 
+    $right:$basum[2]; 
+    $modulation:&base[];
+};
+
+&modulation%parse($str::&string):{};
+
+&modulation%neg(&self):{
+	$modulation: &self$modulation * -1;
+};
+
+&modulation%add(&modulation:$other):{
+    &self$modulation: &self$modulation or $other$modulation;
+};
+
+&modulation%sub(&modulation:$other):{
+    &self$modulation: &self$modulation and $other$modulation;
+};
+
+&modulation%mul(&modulation:$other):{
+    {
+        [&self$left,  $other$middle] => &self$right;
+        [&self$middle,$other$right]  => &self$left;
+        [&self$right, $other$left]   => &self$middle;
+        [&self$left,  $other$left]   => -1;
+        [&self$middle,$other$middle] => -1;
+        [&self$right, $other$right]  => -1;
+    }
+};
+
+&modulation%rdiv(&modulation:$other):&self * &modulation%neg($other);
+&modulation%ldiv(&modulation:$other):&self * &modulation%neg($other);
+&modulation%div(&modulation:$other):&self%rdiv($other);
+
+(*****************************************************************************)
+(* 4.1 Normed Division Algebras												 *)
+
+&imaginary<&N, &B>:{ 
+    $re::&real<&N>;
+    $im::&modulation<&B>;
+};
+
+&complex<&N, &B>:{ 
+    $x::&imaginary<&N, &B>;
+    $y::&imaginary<&N, &B>;
+};
+
+&bicomplex<&N, &B>:{ 
+    $x::&complex<&N, &B>;
+    $y::&complex<&N, &B>;
+};
+
+&quaternion<&N, &B>:{ 
+    $w::&imaginary<&N, &B>;
+    $x::&imaginary<&N, &B>;
+    $y::&imaginary<&N, &B>;
+    $z::&imaginary<&N, &B>;
+};
+
+&biquaternion<&N, &B>:{ 
+    $w::&complex<&N, &B>;
+    $x::&complex<&N, &B>;
+    $y::&complex<&N, &B>;
+    $z::&complex<&N, &B>;
+};
+
+&octonion<&N, &B>:{ 
+    $a::&quaternion<&N, &B>;
+    $b::&quaternion<&N, &B>;
+};
+
+&bioctonion<&N, &B>:{ 
+    $a::&biquaternion<&N, &B>;
+    $b::&biquaternion<&N, &B>;
+};
+
+(*****************************************************************************)
+(* 4.2 Number, Length, Arbitrary, Compositions								 *)
+
+&number<&N, &B>::(
+	&imaginary<&N, &B>,
+	&complex<&N, &B>,
+	&bicomplex<&N, &B>,
+	&quaternion<&N, &B>,
+	&biquaternion<&N, &B>,
+	&octonion<&N, &B>,
+	&bioctonion<&N, &B>
+);
+
+&lenop::("EDGES", "SEGMENT", "LEFTRAY", "RIGHTRAY", "LINE", "WHOLE");
+&length<&N, &B>::{
+	$range::&interval<&N>;
+	$im::&modulation<&B>;
+	$op::&lenop;
+};
+
+&arbitrary<&N, &B>::{
+	$range::&interval<&N>;
+	$im::&modulation<&B>;
+};
+
+&composition<&N, &B>::{
+	$re::&interval<&N>;
+	$range::&interval<&N>;
+	$im::&modulation<&B>;
+	$op::&lenop;
+};
+
+(*****************************************************************************)
+(* 5. NDA-Rule & NDA-Implementations										 *)
+
+?NDA::{
+	?self%neg,
+	?self%add,
+	?self%ladd,
+	?self%radd,
+	?self%sub,
+	?self%lsub,
+	?self%rsub,
+	?self%mul,
+	?self%rmul,
+	?self%lmul,
+	?self%div,
+	?self%rdiv,
+	?self%ldiv,
+	?self%addassign,
+	?self%laddassign,
+	?self%raddassign,
+	?self%subassign,
+	?self%lsubassign,
+	?self%rsubassign,
+	?self%mulassign,
+	?self%rmulassign,
+	?self%lmulassign,
+	?self%divassign,
+	?self%rdivassign,
+	?self%ldivassign,
+	?self%conj,
+	?self%sqrt,
+	?self%norm,
+	?self%inv,
+};
+
+&imaginary<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{
+        $re::&real<&N>: 0 - &self$re;
+        $im::&modulation<&B>: 0 - &self$im;
+    };
+    /* add */
+    %add(&other):{
+        $re::&real<&N>: &self$re + &other$re;
+        $im::&modulation<&B>:&self$im + &other$im;
+    };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $re::&real<&N>: &self$re + &other$re; $im::&modulation<&B>:&self$im + &other$im; };
+    %radd(&other):{ $re::&real<&N>: &self$re + &other$re; $im::&modulation<&B>:&self$im + &other$im; };
+    /* sub */
+    %sub(&other):{
+        $re::&real<&N>: &self$re - &other$re;
+        $im::&modulation<&B>:&self$im - &other$im;
+    };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $re::&real<&N>: &self$re - &other$re; $im::&modulation<&B>:&self$im - &other$im; };
+    %rsub(&other):{ $re::&real<&N>: &other$re - &self$re; $im::&modulation<&B>:&other$im - &self$im; };
+    /* mul – Cayley‑Dickson for 2‑dimensional elements */
+    %mul(&other):{
+        $re::&real<&N>: (&self$re * &other$re) - ($other$im%conj() * &self$im);
+        $im::&modulation<&B>: ($other$im * &self$re) + (&self$im * &other$re%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $re::&real<&N>: (&self$re * &other$re) - ($other$im%conj() * &self$im); $im::&modulation<&B>: ($other$im * &self$re) + (&self$im * &other$re%conj()); };
+    %lmul(&other):{ $re::&real<&N>: (&self$re * &other$re) - ($other$im%conj() * &self$im); $im::&modulation<&B>: ($other$im * &self$re) + (&self$im * &other$re%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&imaginary: &other%inv();
+        $temp::&imaginary: &self%mul($inv);
+        $re::&real<&N>: $temp$re;
+        $im::&modulation<&B>:$temp$im;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&imaginary: &other%inv(); $temp::&imaginary: &self%mul($inv); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    %ldiv(&other):{ $inv::&imaginary: &self%inv(); $temp::&imaginary: &other%mul($inv); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $re::&real<&N>: &self$re + &other$re; $im::&modulation<&B>:&self$im + &other$im; };
+    %laddassign(&other):{ $re::&real<&N>: &self$re + &other$re; $im::&modulation<&B>:&self$im + &other$im; };
+    %raddassign(&other):{ $re::&real<&N>: &self$re + &other$re; $im::&modulation<&B>:&self$im + &other$im; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $re::&real<&N>: &self$re - &other$re; $im::&modulation<&B>:&self$im - &other$im; };
+    %lsubassign(&other):{ $re::&real<&N>: &self$re - &other$re; $im::&modulation<&B>:&self$im - &other$im; };
+    %rsubassign(&other):{ $re::&real<&N>: &other$re - &self$re; $im::&modulation<&B>:&other$im - &self$im; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&imaginary: &self%mul($other);
+        $re::&real<&N>: $temp$re;
+        $im::&modulation<&B>:$temp$im;
+    };
+    %rmulassign(&other):{ $temp::&imaginary: &self%mul($other); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    %lmulassign(&other):{ $temp::&imaginary: &self%mul($other); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&imaginary: &other%inv();
+        $temp::&imaginary: &self%mul($inv);
+        $re::&real<&N>: $temp$re;
+        $im::&modulation<&B>:$temp$im;
+    };
+    %rdivassign(&other):{ $inv::&imaginary: &other%inv(); $temp::&imaginary: &self%mul($inv); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    %ldivassign(&other):{ $inv::&imaginary: &self%inv(); $temp::&imaginary: &other%mul($inv); $re::&real<&N>: $temp$re; $im::&modulation<&B>:$temp$im; };
+    /* conj */
+    %conj():{
+        $re::&real<&N>: &self$re;
+        $im::&modulation<&B>: 0 - &self$im;
+    };
+    /* sqrt – square‑root of the norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$re * &self$re) + (&self$im * &self$im)); };
+    /* inv – multiplicative inverse */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$re * &self$re) + (&self$im * &self$im);
+        $conj::&imaginary: &self%conj();
+        $re::&real<&N>: $conj$re / $norm_sq;
+        $im::&modulation<&B>: 0 - ($conj$im / $norm_sq);
+    };
+};
+
+&complex<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $x::&imaginary: 0 - &self$x; $y::&imaginary: 0 - &self$y; };
+    /* add */
+    %add(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    %radd(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    /* sub */
+    %sub(&other):{ $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; };
+    %rsub(&other):{ $x::&imaginary: &other$x - &self$x; $y::&imaginary: &other$y - &self$y; };
+    /* mul – Cayley‑Dickson for 4‑dimensional elements */
+    %mul(&other):{
+        $x::&imaginary: (&self$x * &other$x) - ($other$y%conj() * &self$y);
+        $y::&imaginary: ($other$y * &self$x) + (&self$y * &other$x%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $x::&imaginary: (&self$x * &other$x) - ($other$y%conj() * &self$y); $y::&imaginary: ($other$y * &self$x) + (&self$y * &other$x%conj()); };
+    %lmul(&other):{ $x::&imaginary: (&self$x * &other$x) - ($other$y%conj() * &self$y); $y::&imaginary: ($other$y * &self$x) + (&self$y * &other$x%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&complex: &other%inv();
+        $temp::&complex: &self%mul($inv);
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&complex: &other%inv(); $temp::&complex: &self%mul($inv); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    %ldiv(&other):{ $inv::&complex: &self%inv(); $temp::&complex: &other%mul($inv); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    %laddassign(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    %raddassign(&other):{ $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; };
+    %lsubassign(&other):{ $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; };
+    %rsubassign(&other):{ $x::&imaginary: &other$x - &self$x; $y::&imaginary: &other$y - &self$y; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&complex: &self%mul($other);
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+    };
+    %rmulassign(&other):{ $temp::&complex: &self%mul($other); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    %lmulassign(&other):{ $temp::&complex: &self%mul($other); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&complex: &other%inv();
+        $temp::&complex: &self%mul($inv);
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+    };
+    %rdivassign(&other):{ $inv::&complex: &other%inv(); $temp::&complex: &self%mul($inv); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    %ldivassign(&other):{ $inv::&complex: &self%inv(); $temp::&complex: &other%mul($inv); $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; };
+    /* conj */
+    %conj():{ $x::&imaginary: &self$x%conj(); $y::&imaginary: &self$y%conj(); };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$x* &self$x) + (&self$y * &self$y)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$x* &self$x) + (&self$y * &self$y);
+        $conj::&complex: &self%conj();
+        $x::&imaginary: $conj$x / $norm_sq;
+        $y::&imaginary: $conj$y / $norm_sq;
+    };
+};
+
+&bicomplex<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $x::&complex: 0 - &self$x; $y::&complex: 0 - &self$y; };
+    /* add */
+    %add(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    %radd(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    /* sub */
+    %sub(&other):{ $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; };
+    %rsub(&other):{ $x::&complex: &other$x - &self$x; $y::&complex: &other$y - &self$y; };
+    /* mul – Cayley‑Dickson for 8‑dimensional elements */
+    %mul(&other):{
+        $x::&complex: (&self$x * &other$x) - ($other$y%conj() * &self$y);
+        $y::&complex: ($other$y * &self$x) + (&self$y * &other$x%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $x::&complex: (&self$x * &other$x) - ($other$y%conj() * &self$y); $y::&complex: ($other$y * &self$x) + (&self$y * &other$x%conj()); };
+    %lmul(&other):{ $x::&complex: (&self$x * &other$x) - ($other$y%conj() * &self$y); $y::&complex: ($other$y * &self$x) + (&self$y * &other$x%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&bicomplex: &other%inv();
+        $temp::&bicomplex: &self%mul($inv);
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&bicomplex: &other%inv(); $temp::&bicomplex: &self%mul($inv); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    %ldiv(&other):{ $inv::&bicomplex: &self%inv(); $temp::&bicomplex: &other%mul($inv); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    %laddassign(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    %raddassign(&other):{ $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; };
+    %lsubassign(&other):{ $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; };
+    %rsubassign(&other):{ $x::&complex: &other$x - &self$x; $y::&complex: &other$y - &self$y; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&bicomplex: &self%mul($other);
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+    };
+    %rmulassign(&other):{ $temp::&bicomplex: &self%mul($other); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    %lmulassign(&other):{ $temp::&bicomplex: &self%mul($other); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&bicomplex: &other%inv();
+        $temp::&bicomplex: &self%mul($inv);
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+    };
+    %rdivassign(&other):{ $inv::&bicomplex: &other%inv(); $temp::&bicomplex: &self%mul($inv); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    %ldivassign(&other):{ $inv::&bicomplex: &self%inv(); $temp::&bicomplex: &other%mul($inv); $x::&complex: $temp$x; $y::&complex: $temp$y; };
+    /* conj */
+    %conj():{ $x::&complex: &self$x%conj(); $y::&complex: &self$y%conj(); };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$x* &self$x) + (&self$y * &self$y)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$x* &self$x) + (&self$y * &self$y);
+        $conj::&bicomplex: &self%conj();
+        $x::&complex: $conj$x / $norm_sq;
+        $y::&complex: $conj$y / $norm_sq;
+    };
+};
+
+&quaternion<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $w::&imaginary: 0 - &self$w; $x::&imaginary: 0 - &self$x; $y::&imaginary: 0 - &self$y; $z::&imaginary: 0 - &self$z; };
+    /* add */
+    %add(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    %radd(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    /* sub */
+    %sub(&other):{ $w::&imaginary: &self$w - &other$w; $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; $z::&imaginary: &self$z - &other$z; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $w::&imaginary: &self$w - &other$w; $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; $z::&imaginary: &self$z - &other$z; };
+    %rsub(&other):{ $w::&imaginary: &other$w - &self$w; $x::&imaginary: &other$x - &self$x; $y::&imaginary: &other$y - &self$y; $z::&imaginary: &other$z - &self$z; };
+    /* mul – Cayley‑Dickson for 16‑dimensional elements */
+    %mul(&other):{
+        $w::&imaginary: (&self$w * &other$w) - ($other$z%conj() * &self$x);
+        $x::&imaginary: ($other$z * &self$w) + (&self$x * &other$w%conj());
+        $y::&imaginary: ($other$y * &self$w) + (&self$y * &other$w%conj());
+        $z::&imaginary: ($other$w * &self$z) + (&self$z * &other$w%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $w::&imaginary: (&self$w * &other$w) - ($other$z%conj() * &self$x); $x::&imaginary: ($other$z * &self$w) + (&self$x * &other$w%conj()); $y::&imaginary: ($other$y * &self$w) + (&self$y * &other$w%conj()); $z::&imaginary: ($other$w * &self$z) + (&self$z * &other$w%conj()); };
+    %lmul(&other):{ $w::&imaginary: (&self$w * &other$w) - ($other$z%conj() * &self$x); $x::&imaginary: ($other$z * &self$w) + (&self$x * &other$w%conj()); $y::&imaginary: ($other$y * &self$w) + (&self$y * &other$w%conj()); $z::&imaginary: ($other$w * &self$z) + (&self$z * &other$w%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&quaternion: &other%inv();
+        $temp::&quaternion: &self%mul($inv);
+        $w::&imaginary: $temp$w;
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+        $z::&imaginary: $temp$z;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&quaternion: &other%inv(); $temp::&quaternion: &self%mul($inv); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    %ldiv(&other):{ $inv::&quaternion: &self%inv(); $temp::&quaternion: &other%mul($inv); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    %laddassign(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    %raddassign(&other):{ $w::&imaginary: &self$w + &other$w; $x::&imaginary: &self$x + &other$x; $y::&imaginary: &self$y + &other$y; $z::&imaginary: &self$z + &other$z; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $w::&imaginary: &self$w - &other$w; $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; $z::&imaginary: &self$z - &other$z; };
+    %lsubassign(&other):{ $w::&imaginary: &self$w - &other$w; $x::&imaginary: &self$x - &other$x; $y::&imaginary: &self$y - &other$y; $z::&imaginary: &self$z - &other$z; };
+    %rsubassign(&other):{ $w::&imaginary: &other$w - &self$w; $x::&imaginary: &other$x - &self$x; $y::&imaginary: &other$y - &self$y; $z::&imaginary: &other$z - &self$z; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&quaternion: &self%mul($other);
+        $w::&imaginary: $temp$w;
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+        $z::&imaginary: $temp$z;
+    };
+    %rmulassign(&other):{ $temp::&quaternion: &self%mul($other); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    %lmulassign(&other):{ $temp::&quaternion: &self%mul($other); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&quaternion: &other%inv();
+        $temp::&quaternion: &self%mul($inv);
+        $w::&imaginary: $temp$w;
+        $x::&imaginary: $temp$x;
+        $y::&imaginary: $temp$y;
+        $z::&imaginary: $temp$z;
+    };
+    %rdivassign(&other):{ $inv::&quaternion: &other%inv(); $temp::&quaternion: &self%mul($inv); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    %ldivassign(&other):{ $inv::&quaternion: &self%inv(); $temp::&quaternion: &other%mul($inv); $w::&imaginary: $temp$w; $x::&imaginary: $temp$x; $y::&imaginary: $temp$y; $z::&imaginary: $temp$z; };
+    /* conj */
+    %conj():{ $w::&imaginary: &self$w; $x::&imaginary: 0 - &self$x; $y::&imaginary: 0 - &self$y; $z::&imaginary: 0 - &self$z; };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$w* &self$w) + (&self$x * &self$x) + (&self$y * &self$y) + (&self$z * &self$z)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$w* &self$w) + (&self$x * &self$x) + (&self$y * &self$y) + (&self$z * &self$z);
+        $conj::&quaternion: &self%conj();
+        $w::&imaginary: $conj$w / $norm_sq;
+        $x::&imaginary: $conj$x / $norm_sq;
+        $y::&imaginary: $conj$y / $norm_sq;
+        $z::&imaginary: $conj$z / $norm_sq;
+    };
+};
+
+&biquaternion<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $w::&complex: 0 - &self$w; $x::&complex: 0 - &self$x; $y::&complex: 0 - &self$y; $z::&complex: 0 - &self$z; };
+    /* add */
+    %add(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    %radd(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    /* sub */
+    %sub(&other):{ $w::&complex: &self$w - &other$w; $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; $z::&complex: &self$z - &other$z; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $w::&complex: &self$w - &other$w; $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; $z::&complex: &self$z - &other$z; };
+    %rsub(&other):{ $w::&complex: &other$w - &self$w; $x::&complex: &other$x - &self$x; $y::&complex: &other$y - &self$y; $z::&complex: &other$z - &self$z; };
+    /* mul – Cayley‑Dickson for 32‑dimensional elements */
+    %mul(&other):{
+        $w::&complex: (&self$w * &other$w) - ($other$z%conj() * &self$x);
+        $x::&complex: ($other$z * &self$w) + (&self$x * &other$w%conj());
+        $y::&complex: ($other$y * &self$w) + (&self$y * &other$w%conj());
+        $z::&complex: ($other$w * &self$z) + (&self$z * &other$w%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $w::&complex: (&self$w * &other$w) - ($other$z%conj() * &self$x); $x::&complex: ($other$z * &self$w) + (&self$x * &other$w%conj()); $y::&complex: ($other$y * &self$w) + (&self$y * &other$w%conj()); $z::&complex: ($other$w * &self$z) + (&self$z * &other$w%conj()); };
+    %lmul(&other):{ $w::&complex: (&self$w * &other$w) - ($other$z%conj() * &self$x); $x::&complex: ($other$z * &self$w) + (&self$x * &other$w%conj()); $y::&complex: ($other$y * &self$w) + (&self$y * &other$w%conj()); $z::&complex: ($other$w * &self$z) + (&self$z * &other$w%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&biquaternion: &other%inv();
+        $temp::&biquaternion: &self%mul($inv);
+        $w::&complex: $temp$w;
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+        $z::&complex: $temp$z;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&biquaternion: &other%inv(); $temp::&biquaternion: &self%mul($inv); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    %ldiv(&other):{ $inv::&biquaternion: &self%inv(); $temp::&biquaternion: &other%mul($inv); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    %laddassign(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    %raddassign(&other):{ $w::&complex: &self$w + &other$w; $x::&complex: &self$x + &other$x; $y::&complex: &self$y + &other$y; $z::&complex: &self$z + &other$z; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $w::&complex: &self$w - &other$w; $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; $z::&complex: &self$z - &other$z; };
+    %lsubassign(&other):{ $w::&complex: &self$w - &other$w; $x::&complex: &self$x - &other$x; $y::&complex: &self$y - &other$y; $z::&complex: &self$z - &other$z; };
+    %rsubassign(&other):{ $w::&complex: &other$w - &self$w; $x::&complex: &other$x - &self$x; $y::&complex: &other$y - &self$y; $z::&complex: &other$z - &self$z; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&biquaternion: &self%mul($other);
+        $w::&complex: $temp$w;
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+        $z::&complex: $temp$z;
+    };
+    %rmulassign(&other):{ $temp::&biquaternion: &self%mul($other); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    %lmulassign(&other):{ $temp::&biquaternion: &self%mul($other); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&biquaternion: &other%inv();
+        $temp::&biquaternion: &self%mul($inv);
+        $w::&complex: $temp$w;
+        $x::&complex: $temp$x;
+        $y::&complex: $temp$y;
+        $z::&complex: $temp$z;
+    };
+    %rdivassign(&other):{ $inv::&biquaternion: &other%inv(); $temp::&biquaternion: &self%mul($inv); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    %ldivassign(&other):{ $inv::&biquaternion: &self%inv(); $temp::&biquaternion: &other%mul($inv); $w::&complex: $temp$w; $x::&complex: $temp$x; $y::&complex: $temp$y; $z::&complex: $temp$z; };
+    /* conj */
+    %conj():{ $w::&complex: &self$w%conj(); $x::&complex: &self$x%conj(); $y::&complex: &self$y%conj(); $z::&complex: &self$z%conj(); };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$w* &self$w) + (&self$x * &self$x) + (&self$y * &self$y) + (&self$z * &self$z)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$w* &self$w) + (&self$x * &self$x) + (&self$y * &self$y) + (&self$z * &self$z);
+        $conj::&biquaternion: &self%conj();
+        $w::&complex: $conj$w / $norm_sq;
+        $x::&complex: $conj$x / $norm_sq;
+        $y::&complex: $conj$y / $norm_sq;
+        $z::&complex: $conj$z / $norm_sq;
+    };
+};
+
+&octonion<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $a::&quaternion: 0 - &self$a; $b::&quaternion: 0 - &self$b; };
+    /* add */
+    %add(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    %radd(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    /* sub */
+    %sub(&other):{ $a::&quaternion: &self$a - &other$a; $b::&quaternion: &self$b - &other$ b; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $a::&quaternion: &self$a - &other$a; $b::&quaternion: &self$b - &other$ b; };
+    %rsub(&other):{ $a::&quaternion: &other$a - &self$a; $b::&quaternion: &other$b - &self$ b; };
+    /* mul – Cayley‑Dickson for 16‑dimensional elements */
+    %mul(&other):{
+        $a::&quaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b);
+        $b::&quaternion: ($other$b * &self$a) + (&self$b * &other$a%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $a::&quaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b); $b::&quaternion: ($other$b * &self$a) + (&self$b * &other$a%conj()); };
+    %lmul(&other):{ $a::&quaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b); $b::&quaternion: ($other$b * &self$a) + (&self$b * &other$a%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&octonion: &other%inv();
+        $temp::&octonion: &self%mul($inv);
+        $a::&quaternion: $temp$a;
+        $b::&quaternion: $temp$b;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&octonion: &other%inv(); $temp::&octonion: &self%mul($inv); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    %ldiv(&other):{ $inv::&octonion: &self%inv(); $temp::&octonion: &other%mul($inv); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    %laddassign(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    %raddassign(&other):{ $a::&quaternion: &self$a + &other$a; $b::&quaternion: &self$b + &other$b; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $a::&quaternion: &self$a - &other$a; $b::&quaternion: &self$b - &other$ b; };
+    %lsubassign(&other):{ $a::&quaternion: &self$a - &other$a; $b::&quaternion: &self$b - &other$ b; };
+    %rsubassign(&other):{ $a::&quaternion: &other$a - &self$a; $b::&quaternion: &other$b - &self$ b; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&octonion: &self%mul($other);
+        $a::&quaternion: $temp$a;
+        $b::&quaternion: $temp$b;
+    };
+    %rmulassign(&other):{ $temp::&octonion: &self%mul($other); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    %lmulassign(&other):{ $temp::&octonion: &self%mul($other); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&octonion: &other%inv();
+        $temp::&octonion: &self%mul($inv);
+        $a::&quaternion: $temp$a;
+        $b::&quaternion: $temp$b;
+    };
+    %rdivassign(&other):{ $inv::&octonion: &other%inv(); $temp::&octonion: &self%mul($inv); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    %ldivassign(&other):{ $inv::&octonion: &self%inv(); $temp::&octonion: &other%mul($inv); $a::&quaternion: $temp$a; $b::&quaternion: $temp$b; };
+    /* conj */
+    %conj():{ $a::&quaternion: &self$a%conj(); $b::&quaternion: 0 - &self$b; };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$a* &self$a) + (&self$b * &self$b)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$a* &self$a) + (&self$b * &self$b);
+        $conj::&octonion: &self%conj();
+        $a::&quaternion: $conj$a / $norm_sq;
+        $b::&quaternion: $conj$b / $norm_sq;
+    };
+};
+
+&bioctonion<&N,&B>::?NDA:{
+    /* neg */
+    %neg(&self):{ $a::&biquaternion: 0 - &self$a; $b::&biquaternion: 0 - &self$b; };
+    /* add */
+    %add(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    /* ladd, radd – same as add */
+    %ladd(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    %radd(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    /* sub */
+    %sub(&other):{ $a::&biquaternion: &self$a - &other$a; $b::&biquaternion: &self$b - &other$ b; };
+    /* lsub, rsub – order matters */
+    %lsub(&other):{ $a::&biquaternion: &self$a - &other$a; $b::&biquaternion: &self$b - &other$ b; };
+    %rsub(&other):{ $a::&biquaternion: &other$a - &self$a; $b::&biquaternion: &other$b - &self$ b; };
+    /* mul – Cayley‑Dickson for 32‑dimensional elements */
+    %mul(&other):{
+        $a::&biquaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b);
+        $b::&biquaternion: ($other$b * &self$a) + (&self$b * &other$a%conj());
+    };
+    /* rmul, lmul – same as mul */
+    %rmul(&other):{ $a::&biquaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b); $b::&biquaternion: ($other$b * &self$a) + (&self$b * &other$a%conj()); };
+    %lmul(&other):{ $a::&biquaternion: (&self$a * &other$a) - ($other$b%conj() * &self$b); $b::&biquaternion: ($other$b * &self$a) + (&self$b * &other$a%conj()); };
+    /* div */
+    %div(&other):{
+        $inv::&bioctonion: &other%inv();
+        $temp::&bioctonion: &self%mul($inv);
+        $a::&biquaternion: $temp$a;
+        $b::&biquaternion: $temp$b;
+    };
+    /* rdiv, ldiv – same as div (recursively) */
+    %rdiv(&other):{ $inv::&bioctonion: &other%inv(); $temp::&bioctonion: &self%mul($inv); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$b; };
+    %ldiv(&other):{ $inv::&bioctonion: &self%inv(); $temp::&bioctonion: &other%mul($inv); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$b; };
+    /* addassign, laddassign, raddassign */
+    %addassign(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    %laddassign(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    %raddassign(&other):{ $a::&biquaternion: &self$a + &other$a; $b::&biquaternion: &self$b + &other$b; };
+    /* subassign, lsubassign, rsubassign */
+    %subassign(&other):{ $a::&biquaternion: &self$a - &other$a; $b::&biquaternion: &self$b - &other$ b; };
+    %lsubassign(&other):{ $a::&biquaternion: &self$a - &other$a; $b::&biquaternion: &self$b - &other$ b; };
+    %rsubassign(&other):{ $a::&biquaternion: &other$a - &self$a; $b::&biquaternion: &other$b - &self$ b; };
+    /* mulassign, rmulassign, lmulassign */
+    %mulassign(&other):{
+        $temp::&bioctonion: &self%mul($other);
+        $a::&biquaternion: $temp$a;
+        $b::&biquaternion: $temp$b;
+    };
+    %rmulassign(&other):{ $temp::&bioctonion: &self%mul($other); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$b; };
+    %lmulassign(&other):{ $temp::&bioctonion: &self%mul($other); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$b; };
+    /* divassign, rdivassign, ldivassign */
+    %divassign(&other):{
+        $inv::&bioctonion: &other%inv();
+        $temp::&bioctonion: &self%mul($inv);
+        $a::&biquaternion: $temp$a;
+        $b::&biquaternion: $temp$b;
+    };
+    %rdivassign(&other):{ $inv::&bioctonion: &other%inv(); $temp::&bioctonion: &self%mul($inv); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$b; };
+    %ldivassign(&other):{ $inv::&bioctonion: &self%inv(); $temp::&bioctonion: &other%mul($inv); $a::&biquaternion: $temp$a; $b::&biquaternion: $temp$ b; };
+    /* conj */
+    %conj():{ $a::&biquaternion: &self$a%conj(); $b::&biquaternion: 0 - &self$b; };
+    /* sqrt – based on norm */
+    %sqrt():{ $value::&real<&N>: %sqrt(&self%norm()); };
+    /* norm */
+    %norm():{ $value::&real<&N>: %sqrt((&self$a* &self$a) + (&self$b * &self$b)); };
+    /* inv */
+    %inv():{
+        $norm_sq::&real<&N>: (&self$a* &self$a) + (&self$b * &self$b);
+        $conj::&bioctonion: &self%conj();
+        $a::&biquaternion: $conj$a / $norm_sq;
+        $b::&biquaternion: $conj$b / $norm_sq;
+    };
+};
