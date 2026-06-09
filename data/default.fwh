@@ -1,0 +1,54 @@
+&header.default::FollowHeader:
+
+(
+  &primitives:
+  (
+    number;
+    arbitrary;
+    length;
+
+    elementary;
+    composite;
+    unique;
+    unknown;
+  );
+
+  &units:
+  (
+    unit;
+    unity;
+    uniter;
+    unital;
+
+    point;
+    axis;
+    composition;
+    unbeknownst;
+  );
+
+  &physics:
+  (
+    atom;
+    change;
+    force;
+  );
+
+  &tensor:
+  (
+    tensor(rank, indices);
+    tensorial(components);
+  );
+
+  &expression:
+  (
+    expression(repr);
+  );
+
+  &markov:
+  (
+    markov(states);
+    chain(transitions);
+    generator(rates);
+    process(chain);
+  );
+);

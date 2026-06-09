@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, Menus, ASICWorkshop, ASICHighlightReel;
+  Buttons, ComCtrls, Menus, ASICWorkshop, ASICHighlightReel, FollowLang_FFI;
 
 type
 
@@ -77,6 +77,9 @@ type
     DragX, DragY, ResizeX, ResizeY : Integer;
     Highlighting : Boolean;
     Modals : array of TWorkshop;
+    procedure NewServiceClick(Sender: TObject);
+    procedure NewWorkerClick(Sender: TObject);
+    procedure SpawnCanorOSModule(ModuleType: DWord);
   public
     procedure StartHighlight(Sender : TObject);
     procedure StopHighlight(Sender : TObject);
@@ -128,6 +131,43 @@ end;
 procedure TTools.FormCreate(Sender: TObject);
 begin
   HighlightReel := THighlightReel.Create(Self);
+  NewServiceItem.OnClick := @NewServiceClick;
+  NewWorkerItem.OnClick := @NewWorkerClick;
+end;
+
+procedure TTools.NewServiceClick(Sender: TObject);
+begin
+  SpawnCanorOSModule(0);
+end;
+
+procedure TTools.NewWorkerClick(Sender: TObject);
+begin
+  SpawnCanorOSModule(1);
+end;
+
+procedure TTools.SpawnCanorOSModule(ModuleType: DWord);
+var
+  ModuleId: QWord;
+  W: TWorkshop;
+  NameBuf, StatusBuf: array[0..255] of Char;
+  MType: DWord;
+  MPre, MPeri, MPost: Integer;
+begin
+  ModuleId := canoros_spawn_module(ModuleType);
+  
+  SetLength(Self.Modals, Length(Self.Modals) + 1);
+  W := TWorkshop.Create(Self);
+  Self.Modals[High(Self.Modals)] := W;
+  W.ModuleId := ModuleId;
+  
+  if canoros_get_module_info(ModuleId, @MType, @MPre, @MPeri, @MPost, NameBuf, 256, StatusBuf, 256) <> 0 then
+  begin
+    W.Header.Caption := 'CanorOS Module: ' + StrPas(NameBuf);
+    W.StatusText.Caption := StrPas(StatusBuf) + ' (Pre: ' + IntToStr(MPre) + ', Peri: ' + IntToStr(MPeri) + ', Post: ' + IntToStr(MPost) + ')';
+  end;
+  
+  W.Show();
+  HighlightReel.AddModule(StrPas(NameBuf), W);
 end;
 
 procedure TTools.FormKeyDown(Sender: TObject; var Key: Word;

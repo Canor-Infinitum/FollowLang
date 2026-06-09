@@ -1,0 +1,115 @@
+(* Terminals *)
+
+WS             = { " " | "\t" | "\n" | "\r" } ;
+COMMENT        = ("//" { !"\n" } ("\n" | EOF))
+               | ("/*" {!"*"})* ("*" {!"/"})* "*/"
+			   | ("(*" {!"*"})* ("*" {!")"})* "*)" ;
+(* Lexing note: Skip WS and COMMENT *)
+
+IMPORT         = ":" ;
+TYPE           = "&" ;
+FUNCTION       = "%" ;
+VARIABLE       = "$" ;
+IDENTITY       = "~" ;
+CATEGORY       = "#" ;
+SYMBOL         = "@" ;
+POINTER        = "^" ;
+RULE           = "?" ;
+PREDICATE      = "!" ;
+GENERIC        = "_" ;
+
+PLUS           = "+" ;
+MINUS          = "-" ;
+MULTIPLY       = "*" ;
+RIGHTDIVISION  = "/" ;
+LEFTDIVISION   = "\\" ;
+EQUALS         = "=" ;
+LESSTHAN       = "<" ;
+GREATERTHAN    = ">" ;
+
+AND            = "and"  | "&&" ;
+OR             = "or"   | "||" ;
+XOR            = "xor" ;
+NAND           = "nand" ;
+NOR            = "nor" ;
+XNOR           = "xnor" ;
+NOT            = "not" ;
+
+SIGIL          = TYPE | FUNCTION | VARIABLE | IDENTITY | CATEGORY | SYMBOL | POINTER | RULE | PREDICATE | GENERIC ;
+IDENT          = ( LETTER | "_" ) , { LETTER | DIGIT | "_" } ;
+LETTER         = "A" | ... | "Z" | "a" | ... | "z" ;
+DIGIT          = "0" | ... | "9" ;
+
+ESCAPE         = "\\" , ( "n" | "t" | "\"" | "\\" ) ;
+STRING         = '"' , { !'"' , ESCAPE } , '"' ;
+NUMBER         = DIGIT , { DIGIT } ;
+BOOLEAN        = "TRUE" | "FALSE" ;
+MAYBE          = "MAYBE" BOOLEAN ;
+
+LPAREN         = "(" ;  RPAREN = ")" ;
+LBRACK         = "[" ;  RBRACK = "]" ;
+LBRACE         = "{" ;  RBRACE = "}" ;
+LANGLE         = "<" ;  RANGLE = ">" ;
+
+COMMA          = "," ;
+DOT            = "." ;
+SEMI           = ";" ;
+COLON          = ":" ;
+PIPE           = "|" ;
+DBL_COLON      = "::" ;
+MATCHES        = "=>" ;
+DEFINES        = ":=" ;
+
+(* Nonterminals *)
+Program        = { TopLevel } ;
+TopLevel       = Atom | Macro | ImportLine ;
+
+ImportLine     = COLON STRING SEMI ;
+
+Macro          = COLON IDENT { DOT IDENT } [ Expr ] SEMI ;
+
+Element        = Grouping | AtomCore | Literal | Empty ;
+Empty          = ; (* epsilon *)
+
+Literal        = STRING | NUMBER | BOOLEAN | MAYBE | BARDOT ;
+BARDOT         = "|" , { ! "." } , "." ;
+
+Grouping       = LPAREN [ Body ] RPAREN
+               | LBRACK [ Body ] RBRACK
+               | LBRACE [ Body ] RBRACE
+               | LANGLE [ Body ] RANGLE ;
+
+Body           = Expr ;
+
+(* Operator Precedence Levels - All allow Empty for trailing/missing parts *)
+Expr           = PipeLevel ;
+PipeLevel      = SemiLevel  { PIPE SemiLevel } ;
+SemiLevel      = ColonLevel { SEMI ColonLevel } ;
+ColonLevel     = DotLevel   { COLON DotLevel } ;
+DotLevel       = CommaLevel { DOT CommaLevel } ;
+CommaLevel     = Expression { COMMA Expression } ;
+
+Expression     = LogicalOr [ MATCHES LogicalOr ] ;
+
+LogicalOr      = LogicalAnd { ( OR | XOR | NOR | XNOR ) LogicalAnd } ;
+LogicalAnd     = MathExpr { ( AND | NAND ) MathExpr } ;
+MathExpr       = MathTerm { ( PLUS | MINUS ) MathTerm } ;
+MathTerm       = MathFactor { ( MULTIPLY | RIGHTDIVISION | LEFTDIVISION ) MathFactor } ;
+MathFactor     = ( [ PLUS | MINUS | NOT ] MathFactor ) 
+               | Element 
+               | LPAREN Expr RPAREN ;
+
+(* Atom is core + optional template + optional definition + mandatory SEMI *)
+Atom           = AtomCore [ Definition ] SEMI ; 
+
+AtomCore       = ( { SigilNs } | IDENT ) { Invocation } { Template } ;
+
+(* SigilNs: SIGIL followed by optional IDENT (for quotation/meta) *)
+(* Note: Top-level Atom heads require IDENT for every segment. *)
+SigilNs        = SIGIL [ IDENT ] { DOT IDENT } ;
+
+Invocation     = Grouping | MethodCall;
+MethodCall     = ( DOT | SIGIL ) IDENT [ Grouping ] ;
+Template       = DBL_COLON ( Expr | Grouping ) ;
+
+Definition     = ( COLON | DEFINES ) Expr ;

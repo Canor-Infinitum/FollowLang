@@ -67,12 +67,14 @@ Throughout all of these, machine-epsilon update-/error-rate ratios are monitored
 
 ## 3. Security and Compilation Validation
 
-During the compilation process, the **Envoy** validator audits the intermediate representations - It performs an AI/ML "Engulf Everything" Algorithm, in where the datasets are all:
+During the compilation process of the **Logic Layer** (Layer 4), the **Envoy** validator (Layer 7) audits the intermediate representations - It performs an AI/ML "Engulf Everything" Algorithm, in where the datasets are all:
 - Analyzed for mathematical validity, Quantum Gravity validity, and general programming validity.
 - Ensure all loops in Elite code correspond to closed, stable geodesics.
-- Validate that Larmor-clock phases are properly aligned during United Interchange operations.
+- Validate that Larmor-clock phases are properly aligned during United Interchange operations scheduled by **CanorOS** (Layer 2).
 - Intercept any prompt-injections or state corruption attempts before binary generation.
+- Validated state outputs are then persisted in **FollowDB** (Layer 5) and made accessible to the **Economic Layer** (**Digital Nomadica** - Layer 8).
 Convolutional Neural Network & Reservoir Computing - absorbed in the process.
+
 
 ---
 

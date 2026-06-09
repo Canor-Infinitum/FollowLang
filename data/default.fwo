@@ -1,0 +1,23 @@
+&object.default::FollowObject:
+
+(
+  &project:
+    QGCT_Follow_Project;
+
+  &packages:
+    FollowPackages;
+
+  &header:
+    FollowHeader;
+
+  &source:
+    QGCT_Source;
+
+  &metadata:
+  (
+    format = "fwo";
+    version = "0.1";
+    compiled = true;
+    target = "FollowVM / C++ / Pascal bridge";
+  );
+);

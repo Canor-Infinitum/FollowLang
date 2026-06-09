@@ -13,7 +13,7 @@ object Login: TLogin
   Font.Color = 2236962
   Font.Height = -16
   Font.Name = 'Cambria'
-  FormStyle = fsStayOnTop
+  FormStyle = fsNormal
   HelpFile = 'LOGIN'
   Position = poDesktopCenter
   SnapOptions.SnapToMonitor = True

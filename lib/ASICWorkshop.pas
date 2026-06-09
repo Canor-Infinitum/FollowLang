@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons, ComCtrls, Menus, ASICHighlightReel;
+  Buttons, ComCtrls, Menus, ASICHighlightReel, FollowLang_FFI;
 
 type
 
@@ -77,7 +77,16 @@ type
     FormDragging, FormResize : Boolean;
     DragX, DragY, ResizeX, ResizeY : Integer;
     Highlighting : Boolean;
+    InputMemo: TMemo;
+    OutputMemo: TMemo;
+    RunBtn: TButton;
+    IsProjectCheckBox: TCheckBox;
+    CorrelateBtn: TButton;
+    procedure InitModuleUI;
+    procedure RunBtnClick(Sender: TObject);
+    procedure CorrelateBtnClick(Sender: TObject);
   public
+    ModuleId: QWord;
     procedure StartHighlight(Sender : TObject);
     procedure StopHighlight(Sender : TObject);
   end;
@@ -166,7 +175,117 @@ end;
 
 procedure TWorkshop.FormCreate(Sender: TObject);
 begin
-  Self.LeftPanel.Width := 0;
+  Self.LeftPanel.Width := 250;
+  Self.InitModuleUI();
+end;
+
+procedure TWorkshop.InitModuleUI;
+var
+  LblInput, LblOutput: TLabel;
+begin
+  LblInput := TLabel.Create(Self);
+  LblInput.Parent := LeftPanel;
+  LblInput.Align := alTop;
+  LblInput.Caption := ' FollowLang Expression/Project:';
+  LblInput.Font.Color := clWhite;
+  LblInput.BorderSpacing.Around := 4;
+
+  InputMemo := TMemo.Create(Self);
+  InputMemo.Parent := LeftPanel;
+  InputMemo.Align := alTop;
+  InputMemo.Height := 100;
+  InputMemo.Text := 'coordinates: [t, r, v, p, a, u, v]' + #13#10 + 'r_s = 1.93e-13';
+  InputMemo.BorderSpacing.Around := 4;
+
+  IsProjectCheckBox := TCheckBox.Create(Self);
+  IsProjectCheckBox.Parent := LeftPanel;
+  IsProjectCheckBox.Align := alTop;
+  IsProjectCheckBox.Caption := 'Is Follow Project (.fwp)';
+  IsProjectCheckBox.Checked := True;
+  IsProjectCheckBox.Font.Color := clWhite;
+  IsProjectCheckBox.BorderSpacing.Around := 4;
+
+  RunBtn := TButton.Create(Self);
+  RunBtn.Parent := LeftPanel;
+  RunBtn.Align := alTop;
+  RunBtn.Caption := 'Evaluate/Compile';
+  RunBtn.OnClick := @RunBtnClick;
+  RunBtn.BorderSpacing.Around := 4;
+
+  CorrelateBtn := TButton.Create(Self);
+  CorrelateBtn.Parent := LeftPanel;
+  CorrelateBtn.Align := alTop;
+  CorrelateBtn.Caption := 'Correlate with FollowDB (OEIS)';
+  CorrelateBtn.OnClick := @CorrelateBtnClick;
+  CorrelateBtn.BorderSpacing.Around := 4;
+
+  LblOutput := TLabel.Create(Self);
+  LblOutput.Parent := LeftPanel;
+  LblOutput.Align := alTop;
+  LblOutput.Caption := ' Evaluation Output:';
+  LblOutput.Font.Color := clWhite;
+  LblOutput.BorderSpacing.Around := 4;
+
+  OutputMemo := TMemo.Create(Self);
+  OutputMemo.Parent := LeftPanel;
+  OutputMemo.Align := alClient;
+  OutputMemo.ReadOnly := True;
+  OutputMemo.BorderSpacing.Around := 4;
+end;
+
+procedure TWorkshop.RunBtnClick(Sender: TObject);
+var
+  Code: string;
+  OutBuf: array[0..4095] of Char;
+  NameBuf, StatusBuf: array[0..255] of Char;
+  MType: DWord;
+  MPre, MPeri, MPost: Integer;
+begin
+  Code := InputMemo.Text;
+  if IsProjectCheckBox.Checked then
+  begin
+    if canoros_eval_project(PChar(Code), Length(Code), OutBuf, 4096) <> 0 then
+    begin
+      OutputMemo.Text := StrPas(OutBuf);
+      canoros_get_module_info(ModuleId, @MType, @MPre, @MPeri, @MPost, NameBuf, 256, StatusBuf, 256);
+      StatusText.Caption := StrPas(StatusBuf) + ' (Pre: ' + IntToStr(MPre) + ', Peri: ' + IntToStr(MPeri) + ', Post: ' + IntToStr(MPost) + ')';
+    end
+    else
+      OutputMemo.Text := 'Project FFI evaluation failed.';
+  end
+  else
+  begin
+    if canoros_parse_and_eval(ModuleId, PChar(Code), Length(Code), OutBuf, 4096) <> 0 then
+    begin
+      OutputMemo.Text := StrPas(OutBuf);
+      canoros_get_module_info(ModuleId, @MType, @MPre, @MPeri, @MPost, NameBuf, 256, StatusBuf, 256);
+      StatusText.Caption := StrPas(StatusBuf) + ' (Pre: ' + IntToStr(MPre) + ', Peri: ' + IntToStr(MPeri) + ', Post: ' + IntToStr(MPost) + ')';
+    end
+    else
+      OutputMemo.Text := 'Expression FFI evaluation failed.';
+  end;
+end;
+
+procedure TWorkshop.CorrelateBtnClick(Sender: TObject);
+var
+  ProjInfo, DbQuery, DbResult: string;
+  OutBuf, DbOutBuf: array[0..4095] of Char;
+begin
+  ProjInfo := OutputMemo.Text;
+  DbQuery := 'SELECT MODULATIONS;';
+  
+  if fdb_simulate_query(PChar(DbQuery), Length(DbQuery), DbOutBuf, 4096) <> 0 then
+  begin
+    DbResult := StrPas(DbOutBuf);
+    if instinct_correlate_oeis(PChar(ProjInfo), Length(ProjInfo), PChar(DbResult), Length(DbResult), OutBuf, 4096) <> 0 then
+    begin
+      OutputMemo.Text := ProjInfo + #13#10#13#10 + DbResult + #13#10#13#10 + StrPas(OutBuf);
+    end
+    else
+      OutputMemo.Text := 'OEIS Correlation FFI failed.';
+  end
+  else
+    OutputMemo.Text := 'FollowDB Query FFI failed.';
 end;
 
 procedure TWorkshop.FormKeyDown(Sender: TObject; var Key: Word;

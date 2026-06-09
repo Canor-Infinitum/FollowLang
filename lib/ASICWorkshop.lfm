@@ -13,7 +13,7 @@ object Workshop: TWorkshop
   Font.Color = 2236962
   Font.Height = -16
   Font.Name = 'Cambria'
-  FormStyle = fsStayOnTop
+  FormStyle = fsNormal
   Position = poDesktopCenter
   SnapOptions.Distance = 25
   LCLVersion = '4.6.0.0'
